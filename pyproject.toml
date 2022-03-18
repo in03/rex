@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "resolve-project-exporter"
+version = "0.1.0"
+description = "Batch export Resolve project archives"
+authors = ["Caleb Trevatt <in03@users.noreply.github.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.6.2,<3.7.*"
+yaspin = "^2.1.0"
+rich = "^12.0.0"
+pyfiglet = "^0.8.post1"
+typer = "^0.4.0"
+deepdiff = "^5.7.0"
+"ruamel.yaml" = "^0.17.21"
+schema = "^0.7.5"
+notify-py = "^0.3.3"
+commonregex = "^1.5.3"
+
+[tool.poetry.dev-dependencies]
+mkdocs-material = "^7.3.6"
+black = "^21.12b0"
+isort = "^5.10.1"
+pre-commit = "^2.16.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+rex = "resolve_project_exporter.app.cli:main"
