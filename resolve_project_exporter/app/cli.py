@@ -29,15 +29,24 @@ logger.setLevel(settings["app"]["loglevel"])
 
 
 @cli_app.command()
-def backup():
-    """
-    Backup projects in active DaVinci Resolve database
-    """
+def backup(
+    dry_run: bool = typer.Option(
+        False, help="Test run the backup command without actually writing files."
+    ),
+    active_only: bool = typer.Option(
+        settings["backup", "active_only"],
+        help="Only backup the project that is currently open in Resolve.",
+    ),
+):
+    """Backup projects in the DaVinci Resolve database as DaVinci Resolve project files"""
 
-    print("\n\n[green]Backing up projects[/] :outbox_tray:")
+    print("[green]Backing up projects :inbox_tray:")
     from .. import backup
 
-    backup.main()
+    if active_only:
+        logger.warning("[bold red]Backup active only not yet implemented.")
+    else:
+        backup.batch_backup(dry_run=dry_run)
 
 
 @cli_app.command()
@@ -50,7 +59,7 @@ def config():
 
 def init():
     """Run before CLI App load."""
-    print("YAYA DINGDONG")
+    print("")
 
 
 def main():

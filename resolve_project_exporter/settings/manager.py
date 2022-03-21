@@ -108,7 +108,6 @@ class SettingsManager(metaclass=Singleton):
 
     def _ensure_user_file(self):
         """Copy default settings to user settings if it doesn't exist
-
         Prompt the user to edit the file afterwards, then exit.
         """
 

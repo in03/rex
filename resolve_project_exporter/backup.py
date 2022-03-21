@@ -75,9 +75,13 @@ class ResolveObjects:
             core.app_exit(1, -1)
 
 
-def main():
+r_ = ResolveObjects()
 
-    r_ = ResolveObjects()
+
+def select_db():
+    """Select the DaVinci Resolve database to backup from"""
+    # TODO: Add select DB function
+    # labels: enhancement
 
     # Print DB info
     current_db = r_.project_manager.GetCurrentDatabase()
@@ -86,6 +90,11 @@ def main():
         + " - ".join([v for v in current_db.values()])
         + "[/]"
     )
+
+
+def map_projects_recursively(map_func):
+    """Recurse through all projects and map function to each"""
+    print("awd")
 
     # TODO: Iterate first for a count of projects, then use for a progress bar when exporting
     # labels: enhancement
@@ -96,75 +105,125 @@ def main():
     if logger.getEffectiveLevel() >= 30:  # Warn or above
         spinner.start()
 
-    # in root folder
-    logger.debug(f"[cyan]Projects in root:[/]\n")
-    r_.project_manager.GotoRootFolder()
-    project_list = sorted(r_.project_manager.GetProjectListInCurrentFolder())
-    for project in project_list:
-        spinner.text = f'Exporting "{project}"...'
-        # TODO: Add a dryrun option
-        # labels: enhancement
-        # r_.project_manager.ExportProject(project, output_path, withStillsAndLUTs=True)
+    try:
 
-    logger.debug(project_list)
-    projects.extend(project_list)
+        # in root folder
+        logger.debug(f"[cyan]Projects in root:[/]\n")
+        r_.project_manager.GotoRootFolder()
+        project_list = sorted(r_.project_manager.GetProjectListInCurrentFolder())
+        for project in project_list:
 
-    # in subfolders
-    subfolders = r_.project_manager.GetFolderListInCurrentFolder()
-    for subfolder in subfolders:
+            output_path = settings["backup", "static_dir"]
+            spinner.text = f'Exporting "{project}"...'
+            map_func(project=project, output_path=output_path)
 
-        def recurse_subfolder(subfolder):
-            projects_in_root = True
-            logger.debug(f'[cyan bold]"{subfolder}":')
+        logger.debug(project_list)
+        projects.extend(project_list)
 
-            if r_.project_manager.OpenFolder(subfolder):
+        # in subfolders
+        subfolders = r_.project_manager.GetFolderListInCurrentFolder()
+        for subfolder in subfolders:
 
-                project_list = sorted(
-                    r_.project_manager.GetProjectListInCurrentFolder()
-                )
-                if project_list:
+            def recurse_subfolder(subfolder):
+                projects_in_root = True
+                logger.debug(f'[cyan bold]"{subfolder}":')
 
-                    logger.debug("[cyan]Found projects:[/]")
-                    logger.debug(project_list)
-                    for project in project_list:
+                if r_.project_manager.OpenFolder(subfolder):
 
-                        output_path = settings["export", "archive_static_dir"]
-                        spinner.text = f'Exporting "{project}"...'
-                        # r_.project_manager.ExportProject(project, output_path, withStillsAndLUTs=True)
+                    project_list = sorted(
+                        r_.project_manager.GetProjectListInCurrentFolder()
+                    )
+                    if project_list:
 
-                    projects.extend(project_list)
+                        logger.debug("[cyan]Found projects:[/]")
+                        logger.debug(project_list)
+                        for project in project_list:
 
-                else:
-                    logger.debug("[yellow]No projects in folder root.[/]")
-                    projects_in_root = False
+                            output_path = settings["backup", "static_dir"]
+                            spinner.text = f'Exporting "{project}"...'
 
-                more_folders = r_.project_manager.GetFolderListInCurrentFolder()
-                if more_folders:
-                    logger.debug(f"[cyan]Found folders:[/]\n{more_folders}")
-                    for more_folder in more_folders:
-                        logger.debug("")
-                        recurse_subfolder(more_folder)
-                else:
-                    dead_end_folder = r_.project_manager.GetCurrentFolder()
-                    if not projects_in_root:
-                        logger.debug(f"[red bold]EMPTY. Should delete!")
+                            if kwargs["dry_run"]:
+                                spinner.write(
+                                    f"Dry-run export:'{project}', Output Path: {output_path}"
+                                )
+                            else:
+                                r_.project_manager.ExportProject(
+                                    project, output_path, withStillsAndLUTs=True
+                                )
+
+                        projects.extend(project_list)
+
                     else:
-                        logger.debug(f'[cyan]No more in: "{dead_end_folder}"')
+                        logger.debug("[yellow]No projects in folder root.[/]")
+                        projects_in_root = False
 
-            # Leave once done and no more to recurse
-            logger.debug(":point_up: Back up one dir\n")
-            r_.project_manager.GotoParentFolder()
+                    more_folders = r_.project_manager.GetFolderListInCurrentFolder()
+                    if more_folders:
+                        logger.debug(f"[cyan]Found folders:[/]\n{more_folders}")
+                        for more_folder in more_folders:
+                            logger.debug("")
+                            recurse_subfolder(more_folder)
+                    else:
+                        dead_end_folder = r_.project_manager.GetCurrentFolder()
+                        if not projects_in_root:
+                            logger.debug(f"[red bold]EMPTY. Should delete!")
+                        else:
+                            logger.debug(f'[cyan]No more in: "{dead_end_folder}"')
 
-            # Back to root, since navigating actual Resolve UI
-            # (Leave it nice and tidy ;) )
-            r_.project_manager.GotoRootFolder()
+                # Leave once done and no more to recurse
+                logger.debug(":point_up: Back up one dir\n")
+                r_.project_manager.GotoParentFolder()
 
-        recurse_subfolder(subfolder)
+                # Back to root, since navigating actual Resolve UI
+                # (Leave it nice and tidy ;) )
+                r_.project_manager.GotoRootFolder()
 
-    spinner.stop()
+            recurse_subfolder(subfolder)
+
+    except KeyboardInterrupt as e:
+
+        spinner.stop()
+        print("[yellow]User aborted...")
+        core.app_exit(0)
+
+    except Exception as e:
+
+        spinner.fail("❌  ")
+        logger.exception(e)
+        core.app_exit(1)
+
+    spinner.ok("✔️  ")
     logger.debug(projects)
     logger.info(f"[cyan]Total Projects:[/] {len(projects)}")
+    spinner.hide()
+
+
+def batch_backup(*args, **kwargs):
+
+    select_db()
+
+    # TODO: Fix mapping func
+    # No idea if I'm on the right track with this mapping function.
+    # More like quick pseudocode tbh.
+
+    count = []
+    enumerate_projects = lambda project: count.append(project)
+    map_projects_recursively(enumerate_projects)
+
+    # TODO: Start progress bar using count here!
+
+    if kwargs["dry_run"]:
+        print_project = lambda project, output_path: print(
+            (f"Dry-run export:'{project}', Output Path: {output_path}")
+        )
+        map_projects_recursively(print_project)
+
+    else:
+        export_project = lambda project, output_path: r_.project_manager.ExportProject(
+            project, output_path, withStillsAndLUTs=True
+        )
+        map_projects_recursively(export_project)
 
 
 if __name__ == "__main__":
-    main()
+    batch_backup()

@@ -12,9 +12,9 @@ settings_schema = Schema(
             "log_to_file": bool,
             "logfile_path": lambda p: os.path.exists(p),
         },
-        "export": {
-            "archive_in_project_dir": bool,
-            "archive_in_static_dir": lambda p: os.path.exists(p),
+        "backup": {
+            "in_project_dir": bool,
+            "in_static_dir": lambda p: os.path.exists(p),
         },
     },
     ignore_extra_keys=True,

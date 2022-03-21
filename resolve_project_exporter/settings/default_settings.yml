@@ -8,9 +8,10 @@ app:
 schedule:
   countdown_warning: 30 # Set to 0 for no countdown warning
   enabled_backup_music: true
-  backup_music_path: R:/Resolve Project Backups/backup_song.mp3
+  backup_music_path: files://Resolve/Resolve Project Backups/alert_scheduled_backup.mp3
 
-export:
-  archive_in_project_dir: true
-  archive_in_static_dir: false
-  archive_static_dir: R:/Resolve Project Backups 
+backup:
+  active_only: false # Override with CLI option '--archive-active-only'
+  in_project_dir: true
+  in_static_dir: false
+  static_dir: files://Resolve/Resolve Project Backups 
