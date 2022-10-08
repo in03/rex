@@ -1,67 +1,67 @@
-# Resolve Export Projects
+# REX
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/in03/resolve-project-exporter/main.svg)](https://results.pre-commit.ci/latest/github/in03/resolve-project-exporter/main) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
- ---
-NOTE!: Still a work in progress, not everything is implemented.
+##### Rex helps you avoid extinction-level events with your DaVinci Resolve projects
+
+---
  
-## What's it for? ##
-DaVinci Resolve stores all of its projects in a database, not individual project files.
-This comes with a lot of benefits, but physical files on disk bring a good deal of peace of mind.
-There's currently no easy way to batch export all projects in a database as project files, this aims to fill that gap.
- 
-## How does it work? ##
-It literally just batches through all projects in the database using Resolve's API.
-There are some settings defined in `user_settings.yml` that allow for customisation.
+## What's it for?
+Rex makes exporting, restoring, managing and verifying DaVinci Resolve project files an Endeavour of Minimal Fuss.
 
-## What does it need?
-**This app has a few non-negotiable prerequisites:**
-- Python 3.6 **ONLY** (DaVinci Resolve's Python API requires it)
-- DaVinci Resolve Studio, with scripting set up (read Resolve's scripting README)
+## Why?
 
-## How do I install it?
-### A Warning about Python 3.6
+DaVinci Resolve stores all of its projects in a database (PostgreSQL), not individual project files. And while databases are awesome for many reasons, they do come with some downsides. A centralised database of projects is convenient on a good day and costly on a bad one. Should the database server go down, you lose access to all your projects. You can mitigate this with database backups, but database backups can be complicated to restore. Restoring a database due to data-loss, corruption, human-error, etc, can be very time consuming. If it's a production database, downtime can be particularly costly.
 
-Because DaVinci Resolve requires Python 3.6 to communicate with it's API, no versions over Python 3.6 will work with REX.
-Unfortunately this means that REX may get stuck using older versions of certain packages as they begin to drop support for 3.6.
-It also means that security patches for some dependencies won't make it into REX
-This kind of setup almost guarantees dependency conflicts if you have multiple Python CLI tools you keep installed.
-To mitigate this you can:
+Rex makes backing up, verifying and restoring individual project files an Endeavour of Minimal Fuss. 
 
-- Use Python 3.6 for REX **ONLY** and install a newer Python alongside for your other needs.
+Take my aforementioned "project roll-back" scenario from above, but lets spice it up a bit. Imagine you've found that an entire timeline has been deleted and has actually been missing for a while. In fact you don't know how long it's been missing for. Without a project backup you'll have to restore a database backup. Potentially the steps for that can look like this:
 
-- Install a tool like *pipx* that isolates Python CLI tools with their own virtual environments but keeps them on path.
+1. Find a free system that can host a temporary database (you can't use the same one without incurring downtime: Resolve only connects to port 5432)
+2. Take a guess at how long the timeline has been missing and restore a database backup a few days older than the first backup.
+3. Yay! You found the timeline, but not all the changes are there. Maybe. Restore another database backup just to check.
+4. Perfect! Found it. Alright, export a DaVinci Resolve timeline file.
+5. Stop (and maybe remove) the temporary database server.
+6. Import the exported timeline into the current project.
 
+Second try might be pretty lucky if it's a long running project.
+Therein lies one of the main benefits of running Rex. If you have project backups running alongside database backups, you can much more easily roll-back a single project.
 
-## Configuration
-On first run, you'll be prompted to alter your settings. The app will copy the default settings to the OS user configuration folder. 
-- **Linux/Mac:** `$XDG_HOME_CONFIG/resolve_proxy_encoder/user_settings.yml`
-- **Windows:** `%homepath%/resolve_proxy_encoder/user_settings.yml`
+## Why the name 'Rex'?
+CLI entrypoints are like domain names. You want them short, memorable and it's nice if you can type them with one hand.
+`Rex` fits the bill I'm sorting going for a space theme with my projects at the moment. It's also kind of an awkward acronym derived from **R**esolve Project **EX**porter.
 
+## How does it work?
+Run `rex up` and Rex runs as a background process using a given schedule to trigger actions.
+When a scheduled backup event is reached, Rex waits until you're at your least busy, then exports a DaVinci Resolve project file.
+That DRP is then hashed and compared to existing DRPs. If they match, the duplicate is discared to save space and a symlink is used in place.
+if you've setup a cloud-backup service with Rex, if the new DRP file matches the upload criteria (you can set filters so you're not backing up every single DRP in cloud), it will be uploaded.
 
-## How can I contribute?
-Clone the repo, install dependencies, call from poetry shell:
+Once in a while all the projects are rehashed and compared to their old hashes. If they don't match, Rex will warn you and prompt you to overwrite it with a version backed up in cloud.
+
+> **Note**
+>
+> Rex navigates projects in your database using Resolve's Python API. There's no UI automation, keylogging or phoning home - other than anything you set up > yourself with the cloud storage integrations. I'd encourage you to check the source code to be sure. Never trust strange software. 
+
+## Prerequisites
+Resolve 17 and under need Python 3.6 which is end-of-life now. There's an untested branch `resolve-17` that should allow you to install Rex with older Resolve versions, but it's only for the convenience of not forking your own. Rex depends on several other packages that will probably stop working with Python 3.6 as their maintainers choose to drop Python 3.6 support. Start using Resolve 18 if you can help it.
+
+## Installation
+Install the latest version of Python. You can use official installers or pyenv. Add it to path.
+Since Rex is a CLI application, install it with pipx.
+
+**Windows
+```powershell
+py -3.10 -m pip install pipx
+pipx install rex
 ```
-git clone https://github.com/in03/resolve-export-projects
-cd resolve-export-projects
-py -3.6 -m pip install poetry
-py -3.6 -m poetry shell
-poetry install
-rprox
+**Mac/Linux**
+```bash
+python3 -m pip install pipx
+pipx install rex
 ```
-If you're unfamiliar with using Poetry for dependency management and packaging, [give it a look](https://python-poetry.org/docs/basic-usage).
 
-## How do I use it?
+**Git builds**
 
-```
-Usage: rex [OPTIONS] COMMAND [ARGS]...
+`pipx install git+https://github.com/in03/rex`
 
-Options:
-  --install-completion  Install completion for the current shell.
-  --show-completion     Show completion for the current shell, to copy it or
-                        customize the installation.
-
-  --help                Show this message and exit.
-
-Commands:
-  backup Batch export all projects in the current Resolve DB...
-  ```
+`pipx install git+https://github.com/in03/rex@resolve-17`
