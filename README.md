@@ -1,6 +1,6 @@
 # REX
 
-![Rex logo](https://github.com/in03/rex/blob/docs/images/rex_logo.svg)
+![Rex logo](https://github.com/in03/rex/blob/main/docs/images/rex_logo.svg)
 ![GitHub](https://img.shields.io/github/license/in03/rex) 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ![GitHub branch checks state](https://img.shields.io/github/checks-status/in03/rex/main)
