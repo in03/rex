@@ -12,8 +12,10 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.x
-      - run: pip install mkdocs-material
-             pip install \
-             mkdocs-material \
-             mkdocs-awesome-pages-plugin \
+      - run:
+          pip install \
+          mkdocs-material \
+          mkdocs-gen-files-plugin \
+          mkdocs-literate-nav-plugin \
+          mkdocs-section-index-plugin \
       - run: mkdocs gh-deploy --force

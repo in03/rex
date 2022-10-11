@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "resolve-project-exporter"
+name = "rex"
 version = "0.1.0"
-description = "Batch export Resolve project archives"
+description = "Avoid extinction-level events with your DaVinci Resolve projects"
 authors = ["Caleb Trevatt <in03@users.noreply.github.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.6.2,<3.7.*"
+python = ">=3.6.2,<4.*"
 yaspin = "^2.1.0"
 rich = "^12.0.0"
 pyfiglet = "^0.8.post1"

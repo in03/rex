@@ -1,5 +1,3 @@
-#!/usr/bin/env python3.6
-
 import logging
 import operator
 import os

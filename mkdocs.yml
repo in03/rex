@@ -1,3 +1,31 @@
-site_name: Resolve Proxy Encoder
+site_name: Rex
 theme:
   name: material
+
+plugins:
+  - search
+  - mkdocstrings
+  # - gen-files:
+  #     scripts:
+        # - docs/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - section-index
+  - mkdocstrings:
+      # watch: 
+      #   - resolve_project_exporter
+      # handlers:
+      #   python:
+      #     rendering:
+      #       show_submodules: no
+
+# markdown_extensions:
+# - pymdownx.highlight:
+#     use_pygments: true
+#     pygments_lang_class: true
+
+nav:
+  # defer to gen-files + literate-nav
+  # - Code reference: reference/
+  - About: about.md
+  - User guide: user-guide/

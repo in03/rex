@@ -1,5 +1,12 @@
 # REX
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/in03/resolve-project-exporter/main.svg)](https://results.pre-commit.ci/latest/github/in03/resolve-project-exporter/main) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+![GitHub](https://img.shields.io/github/license/in03/rex) 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![GitHub branch checks state](https://img.shields.io/github/checks-status/in03/rex/main)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/in03/rex/main.svg)](https://results.pre-commit.ci/latest/github/in03/rex/main)
+
+![GitHub last commit](https://img.shields.io/github/last-commit/in03/rex)
+![GitHub Repo stars](https://img.shields.io/github/stars/in03/rex?style=social)
 
 ##### Rex helps you avoid extinction-level events with your DaVinci Resolve projects
 
