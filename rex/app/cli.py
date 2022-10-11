@@ -19,6 +19,7 @@ from rich.console import Console
 from rex.settings.manager import SettingsManager
 from rex.app.utils.core import setup_rich_logging
 
+from pydavinci import davinci
 
 # Init classes
 console = Console()
@@ -32,24 +33,43 @@ logger.setLevel(settings["app"]["loglevel"])
 
 
 @cli_app.command()
+def info():
+    """
+    Get information about the current Resolve environment.
+
+    - Resolve version
+    - List of databases
+    - Current database
+    - Current project
+    """
+    resolve = davinci.Resolve()
+    connected_dbs = resolve.project_manager.db_list
+
+    print(f"[cyan]Resolve version:[/] [magenta]{resolve.version}")
+
+    print("[cyan]Connected databases:")
+    for x in connected_dbs:
+        print(f" * [magenta]{x['DbName']} - {x['DbType']} - {x['IpAddress']}")
+    print()
+
+    print(f"[cyan]Active database:[/] [magenta]{resolve.project_manager.db['DbName']}")
+
+    print(f"[cyan]Active project:[/] [magenta]{resolve.project.name}")
+    print(f"[cyan]Active timeline:[/] [magenta]{resolve.active_timeline.name}")
+
+
+@cli_app.command()
 def backup(
     dry_run: bool = typer.Option(
         False, help="Test run the backup command without actually writing files."
     ),
-    active_only: bool = typer.Option(
-        settings["backup", "active_only"],
-        help="Only backup the project that is currently open in Resolve.",
-    ),
 ):
-    """Backup projects in the DaVinci Resolve database as DaVinci Resolve project files"""
+    """Backup the current Resolve project to configured path now"""
 
     print("[green]Backing up projects :inbox_tray:")
-    from .. import backup
+    from rex import main
 
-    if active_only:
-        logger.warning("[bold red]Backup active only not yet implemented.")
-    else:
-        backup.batch_backup(dry_run=dry_run)
+    main.backup()
 
 
 @cli_app.command()
@@ -62,7 +82,7 @@ def config():
 
 def init():
     """Run before CLI App load."""
-    print("")
+    print()
 
 
 def main():
