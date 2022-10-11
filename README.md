@@ -54,22 +54,13 @@ Once in a while all the projects are rehashed and compared to their old hashes. 
 Install the latest version of Python. You can use official installers or pyenv. Add it to path.
 Since Rex is a CLI application, install it with pipx.
 
-**Windows
-```powershell
-py -3.10 -m pip install pipx
-pipx install rex
 ```
-**Mac/Linux**
-```bash
-python3 -m pip install pipx
-pipx install rex
+pipx install git+https://github.com/in03/rex
+
+# OR
+
+pipx install git+https://github.com/in03/rex@resolve-17
 ```
-
-**Git builds**
-
-`pipx install git+https://github.com/in03/rex`
-
-`pipx install git+https://github.com/in03/rex@resolve-17`
 
 ## Why 'Rex'?
 CLI entrypoints are like domain names. You want them short, memorable and it's nice if you can type them with one hand.

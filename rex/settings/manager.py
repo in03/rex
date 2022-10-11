@@ -5,7 +5,6 @@ import shutil
 import webbrowser
 from pathlib import Path
 from functools import reduce
-from typing import Union, Any
 
 from deepdiff import DeepDiff
 from rich import print
@@ -15,8 +14,8 @@ from yaspin import yaspin
 
 from schema import SchemaError
 
-from ..app.utils import core
-from .schema import settings_schema
+from rex.app.utils import core
+from rex.settings.schema import settings_schema
 
 core.install_rich_tracebacks()
 logger = logging.getLogger(__name__)
@@ -29,7 +28,7 @@ DEFAULT_SETTINGS_FILE = os.path.join(
 USER_SETTINGS_FILE = os.path.join(
     Path.home(),
     ".config",
-    "resolve_project_exporter",
+    "rex",
     "user_settings.yml",
 )
 

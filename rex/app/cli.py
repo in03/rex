@@ -1,20 +1,23 @@
 #!/usr/bin/env python3.6
+
+import sys
+from pyfiglet import Figlet
 from rich import print
 
-# Print CLI title
-print("[bold red]REX[/] :t-rex:")
+fig = Figlet()
+
+sys.stdout.write(fig.renderText("rex"))
+print("[bold]R[/bold]esolve project [bold]Ex[/bold]porter")
+print("[bold]Schedule and manage DaVinci Resolve project backups :t-rex:\n")
+
 
 import logging
-import subprocess
-import webbrowser
-from typing import Optional
 
 import typer
 from rich.console import Console
-from rich.prompt import Confirm
 
-from ..settings.manager import SettingsManager
-from .utils.core import setup_rich_logging
+from rex.settings.manager import SettingsManager
+from rex.app.utils.core import setup_rich_logging
 
 
 # Init classes
@@ -54,7 +57,7 @@ def config():
     """Open user settings configuration file for editing"""
 
     print("[green]Opening user settings file for modification")
-    webbrowser.open_new(settings.user_file)
+    typer.launch(settings.user_file)
 
 
 def init():

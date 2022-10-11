@@ -6,12 +6,13 @@ from rich import print
 
 from .app.utils import core
 from .settings.manager import SettingsManager
+from pydavinci import davinci
 
 settings = SettingsManager()
 
 core.install_rich_tracebacks()
 logger = logging.getLogger(__name__)
-logger.setLevel(settings["app", "loglevel"])
+logger.setLevel(settings["app"]["loglevel"])
 
 from yaspin import yaspin
 
@@ -92,7 +93,7 @@ def select_db():
     )
 
 
-def map_projects_recursively(map_func):
+def map_projects_recursively(map_func, **kwargs):
     """Recurse through all projects and map function to each"""
     print("awd")
 

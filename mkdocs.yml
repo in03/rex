@@ -13,7 +13,7 @@ plugins:
   - section-index
   - mkdocstrings:
       # watch: 
-      #   - resolve_project_exporter
+      #   - rex
       # handlers:
       #   python:
       #     rendering:

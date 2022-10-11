@@ -1,6 +1,6 @@
 
 # Stuff
-::: resolve_project_exporter.stuff
+::: rex.stuff
 
 # Settings
-::: resolve_project_exporter.settings
+::: rex.settings
