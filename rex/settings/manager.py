@@ -11,13 +11,14 @@ from rich import print
 from rich.prompt import Confirm
 from ruamel.yaml import YAML
 from yaspin import yaspin
+from rich import traceback as rich_traceback
 
 from schema import SchemaError
 
 from rex.app.utils import core
 from rex.settings.schema import settings_schema
 
-core.install_rich_tracebacks()
+rich_traceback.install(show_locals=True)
 logger = logging.getLogger(__name__)
 
 DEFAULT_SETTINGS_FILE = os.path.join(

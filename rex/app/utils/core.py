@@ -5,6 +5,23 @@ import time
 from notifypy import Notify
 from rich.logging import RichHandler
 from rich.prompt import Prompt
+import hashlib
+
+
+def md5_checksum(file_):
+    hash_md5 = hashlib.md5()
+    with open(file_, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+
+    return hash_md5.hexdigest()
+
+
+import hashlib
+
+h = hashlib.new("sha256")  # sha256 can be replaced with diffrent algorithms
+h.update("Hello World".encode())  # give a encoded string. Makes the String to the Hash
+print(h.hexdigest())  # Prints the Hash
 
 
 def setup_rich_logging():
@@ -30,14 +47,7 @@ setup_rich_logging()
 logger = logging.getLogger(__name__)
 
 
-def install_rich_tracebacks(show_locals=False):
-    """Install rich tracebacks"""
-    from rich.traceback import install
-
-    install(show_locals=show_locals)
-
-
-def app_exit(level: int = 0, timeout: int = -1, cleanup_funcs: list = None):
+def app_exit(level: int = 0, timeout: int = -1, cleanup_funcs: list = []):
 
     """
     Exit function to allow time to
