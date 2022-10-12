@@ -69,7 +69,8 @@ def backup(
     print("[green]Backing up projects :inbox_tray:")
     from rex import main
 
-    main.backup()
+    backup = main.Backup()
+    backup.run()
 
 
 @cli_app.command()
