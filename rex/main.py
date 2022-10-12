@@ -42,29 +42,27 @@ class Backup:
         print(f"Backup Name: '{self.backup_filename}'")
         print(f"Backup Path: '{self.static_dir}'")
 
-    def run(self, generate_checksum: bool = True, de_duplicate: bool = True):
+    def run(self, generate_checksum: bool = True):
         """
         Run the backup routine
 
         Args:
             generate_checksum (bool, optional): Generate an md5 checksum file alongside project backup .drp. Defaults to True.
-            de_duplicate (bool, optional): Compare neighbouring checksums and symlink file if they're identical. Defaults to True.
         """
-
-        if de_duplicate:
-            logger.info("Gathering existing checksums...")
-            self.gather_project_series()
 
         logger.info("Exporting project backup...")
         self.export_project()
 
-        if de_duplicate:
-            logger.info("De-duplicating...")
-            self.de_duplicate()
-
         if generate_checksum:
             logger.info("Generating checksum...")
             self.generate_checksum()
+
+    def export_project(self):
+        assert resolve.project_manager.export_project(
+            project_name=self.project.name,
+            path=self.backup_filepath,
+            stills_and_luts=True,
+        )
 
     def generate_checksum(self):
 
@@ -75,56 +73,3 @@ class Backup:
 
         with open(self.backup_filepath + ".md5", "x") as checksum_file:
             checksum_file.write(hash_md5.hexdigest())
-
-    def export_project(self):
-
-        assert resolve.project_manager.export_project(
-            project_name=self.project.name,
-            path=self.backup_filepath,
-            stills_and_luts=True,
-        )
-
-    def gather_project_series(self):
-        """
-        Get all projects in the project series (all backups matching current project)
-        """
-        self.backup_filepath = os.path.normpath(self.backup_filepath)
-        parent_dir = os.path.dirname(self.backup_filepath)
-        self.matching_checksums = glob(f"{parent_dir}/*{self.project.name}*.drp")
-        sorted(
-            self.matching_checksums,
-            key=lambda name: os.path.getmtime(os.path.join(name)),
-            reverse=False,
-        )
-
-    def de_duplicate(self):
-
-        most_recent_checksums = self.matching_checksums[:3]
-
-        def compare_projects(x: str, y: str):
-
-            file_x = open(x, "rb").read()
-            file_y = open(y, "rb").read()
-            m = SequenceMatcher(None, file_x, file_y)
-            ratio = m.quick_ratio()
-
-            logger.debug(f"[magenta]Match ratio is: {ratio}")
-
-            if ratio >= 0.990:
-                return True
-
-            return False
-
-        matching_checksum = None
-
-        x = self.backup_filepath
-        for y in most_recent_checksums:
-            logger.debug(
-                f"[magenta]Comparing checksum files: '{os.path.basename(x)}' and '{os.path.basename(y)}'"
-            )
-            if compare_projects(x, y):
-                matching_checksum = y
-                break
-
-        if matching_checksum:
-            logger.info(f"Most recent match {matching_checksum}")
