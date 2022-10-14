@@ -10,6 +10,10 @@ schedule:
   enabled_backup_music: true
   backup_music_path: files://Resolve/Resolve Project Backups/alert_scheduled_backup.mp3
 
+server:
+  ip: 127.0.0.1 # Although you can install the server on another machine, you may run into some quirks!
+  port: 8000
+
 backup:
   active_only: false # Override with CLI option '--archive-active-only'
   in_project_dir: true

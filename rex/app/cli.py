@@ -4,6 +4,8 @@ import sys
 from pyfiglet import Figlet
 from rich import print
 
+import requests
+
 fig = Figlet()
 
 sys.stdout.write(fig.renderText("rex"))
@@ -15,10 +17,12 @@ import logging
 
 import typer
 from rich.console import Console
+from rich.panel import Panel
 
 from rex.settings.manager import SettingsManager
 from rex.app.utils.core import setup_rich_logging
-
+from requests import ConnectionError, ConnectTimeout
+from pydavinci.wrappers.project import Project
 from pydavinci import davinci
 
 # Init classes
@@ -31,6 +35,8 @@ setup_rich_logging()
 logger = logging.getLogger(__name__)
 logger.setLevel(settings["app"]["loglevel"])
 
+tld = f"http://{settings['server']['ip']}:{settings['server']['port']}"
+
 
 @cli_app.command()
 def info():
@@ -42,20 +48,31 @@ def info():
     - Current database
     - Current project
     """
-    resolve = davinci.Resolve()
-    connected_dbs = resolve.project_manager.db_list
 
-    print(f"[cyan]Resolve version:[/] [magenta]{resolve.version}")
+    resolve_version = requests.get(f"{tld}/resolve_version").json()
+    databases = requests.get(f"{tld}/databases").json()
+    current_db = requests.get(f"{tld}/current_database").json()
+    all_projects = requests.get(f"{tld}/projects").json()
+    current_project = requests.get(f"{tld}/current_project").json()
 
-    print("[cyan]Connected databases:")
-    for x in connected_dbs:
-        print(f" * [magenta]{x['DbName']} - {x['DbType']} - {x['IpAddress']}")
-    print()
+    db_print = str()
+    for x in databases:
+        db_print += f"* {x['DbName']} - {x['DbType']} - {x['IpAddress']}\n"
 
-    print(f"[cyan]Active database:[/] [magenta]{resolve.project_manager.db['DbName']}")
+    info_msg = (
+        "\n[magenta bold]RESOLVE VERSION[/]\n"
+        f"{resolve_version}\n\n"
+        "[magenta bold]AVAILABLE DATABASES[/]\n"
+        f"{db_print}\n"
+        "[magenta bold]ACTIVE DATABASE[/]\n"
+        f"{current_db['DbName']}\n\n"
+        "[magenta bold]TOTAL PROJECTS[/]\n"
+        f"{len(all_projects)}\n\n"
+        f"[magenta bold]ACTIVE PROJECT[/]\n"
+        f"{current_project}"
+    )
 
-    print(f"[cyan]Active project:[/] [magenta]{resolve.project.name}")
-    print(f"[cyan]Active timeline:[/] [magenta]{resolve.active_timeline.name}")
+    print(Panel(info_msg, title="[cyan]ENVIRONMENT INFO.", title_align="left"))
 
 
 @cli_app.command()
@@ -69,8 +86,13 @@ def backup(
     print("[green]Backing up projects :inbox_tray:")
     from rex import main
 
-    backup = main.Backup()
-    backup.run()
+    success = requests.get(f"{tld}/backup", timeout=20).json()
+    if not success:
+        logger.error("[red]Back up failed...")
+        return False
+
+    logger.info("[green]Succesfully backed up!")
+    return True
 
 
 @cli_app.command()
@@ -87,8 +109,17 @@ def init():
 
 
 def main():
-    init()
-    cli_app()
+    try:
+        init()
+        cli_app()
+    except ConnectionError:
+        ip = settings["server"]["ip"]
+        port = settings["server"]["port"]
+        logger.error(
+            "[magenta]"
+            f"Could not connect to Rex server [{ip}:{port}]\n"
+            f"Is it definitely running?"
+        )
 
 
 if __name__ == "__main__":

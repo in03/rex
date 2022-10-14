@@ -42,7 +42,7 @@ class Backup:
         print(f"Backup Name: '{self.backup_filename}'")
         print(f"Backup Path: '{self.static_dir}'")
 
-    def run(self, generate_checksum: bool = True):
+    def run(self, generate_checksum: bool = True) -> bool:
         """
         Run the backup routine
 
@@ -51,25 +51,35 @@ class Backup:
         """
 
         logger.info("Exporting project backup...")
-        self.export_project()
+        if not self.export_project():
+            return False
 
         if generate_checksum:
             logger.info("Generating checksum...")
-            self.generate_checksum()
+            if not self.generate_checksum():
+                return False
 
-    def export_project(self):
-        assert resolve.project_manager.export_project(
+        return True
+
+    def export_project(self) -> bool:
+        return resolve.project_manager.export_project(
             project_name=self.project.name,
             path=self.backup_filepath,
             stills_and_luts=True,
         )
 
-    def generate_checksum(self):
+    def generate_checksum(self) -> bool:
+        try:
+            hash_md5 = hashlib.md5()
+            with open(self.backup_filepath, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_md5.update(chunk)
 
-        hash_md5 = hashlib.md5()
-        with open(self.backup_filepath, "rb") as f:
-            for chunk in iter(lambda: f.read(4096), b""):
-                hash_md5.update(chunk)
+            with open(self.backup_filepath + ".md5", "x") as checksum_file:
+                checksum_file.write(hash_md5.hexdigest())
 
-        with open(self.backup_filepath + ".md5", "x") as checksum_file:
-            checksum_file.write(hash_md5.hexdigest())
+            return True
+
+        except Exception as e:
+            logger.error(e)
+            return False
