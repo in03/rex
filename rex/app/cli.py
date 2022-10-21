@@ -1,8 +1,13 @@
 #!/usr/bin/env python3.6
 
+import subprocess
+import os
 import sys
+from click import launch
 from pyfiglet import Figlet
 from rich import print
+from pathlib import Path
+from distutils.sysconfig import get_python_lib
 
 import requests
 
@@ -86,7 +91,8 @@ def backup(
     print("[green]Backing up projects :inbox_tray:")
     from rex import main
 
-    success = requests.get(f"{tld}/backup", timeout=20).json()
+    # 2 minute timeout
+    success = requests.get(f"{tld}/backup", timeout=120).json()
     if not success:
         logger.error("[red]Back up failed...")
         return False
@@ -101,6 +107,30 @@ def config():
 
     print("[green]Opening user settings file for modification")
     typer.launch(settings.user_file)
+
+
+@cli_app.command()
+def up():
+    """Start the server in background"""
+
+    print("[green]Starting rex server")
+    # TODO: Use Proxima's script finder to grab pythonw.exe and start rex server
+    # On linux and Mac, can probably just use subprocess and detach.
+    # Also need to programmatically kill rex server instances
+
+    def start_win_server():
+        package_dir = Path(get_python_lib()).resolve().parents[1]
+        scripts_dir = os.path.join(package_dir, "Scripts")
+        server = os.path.abspath(os.path.join(scripts_dir, "uvicorn.exe"))
+        runner = os.path.abspath(os.path.join(scripts_dir, "python.exe"))
+        subprocess.Popen(
+            f"{runner} {server} rex.api:app --host {settings['server']['ip']} --port {settings['server']['port']}"
+        )
+
+    if sys.platform == "win32":
+        start_win_server()
+    else:
+        logger.error("[red]OS not supported!")
 
 
 def init():
