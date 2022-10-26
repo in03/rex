@@ -1,9 +1,12 @@
+import sys
 from time import sleep
-import requests
 from schedule import repeat, every, run_pending
-from notifypy import Notify
 from rex.settings.manager import SettingsManager
+
 import chime
+import requests
+from notifypy import Notify
+from rich import print
 
 settings = SettingsManager()
 frequency = settings["schedule"]["frequency_in_minutes"]
@@ -18,6 +21,8 @@ tld = f"http://{settings['server']['ip']}:{settings['server']['port']}"
 
 @repeat(every(frequency).minutes)
 def scheduled_backup():
+
+    print("[cyan]Running scheduled backup")
 
     # Remind user of scheduled backup
     if countdown_warning > 0:
@@ -50,5 +55,20 @@ def scheduled_backup():
         notification.send()
 
 
-while True:
-    run_pending()
+def loop():
+    # TODO: Add port-based lock somehow
+    # So we don't start multiple scheduler instances
+    print("[green]Scheduler running")
+    while True:
+        run_pending()
+
+
+def test():
+    scheduled_backup()
+    sys.exit()
+
+
+if __name__ == "__main__":
+    test()
+else:
+    loop()
