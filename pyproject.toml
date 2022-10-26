@@ -16,6 +16,12 @@ schema = "^0.7.5"
 notify-py = {git = "https://github.com/in03/notify-py"}
 pydavinci = {git = "https://github.com/in03/pydavinci"}
 yaspin = "^2.2.0"
+fastapi = "^0.85.0"
+uvicorn = {extras = ["standard"], version = "^0.18.3"}
+requests = "^2.28.1"
+psutil = "^5.9.3"
+schedule = "^1.1.0"
+chime = "^0.5.3"
 
 [tool.poetry.dev-dependencies]
 mkdocs-material = "^7.3.6"
