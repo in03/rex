@@ -6,9 +6,8 @@ app:
   logfile_path: R:/Resolve Project Backups/@logs
 
 schedule:
+  frequency_in_minutes: 30
   countdown_warning: 30 # Set to 0 for no countdown warning
-  enabled_backup_music: true
-  backup_music_path: files://Resolve/Resolve Project Backups/alert_scheduled_backup.mp3
 
 server:
   ip: 127.0.0.1 # Although you can install the server on another machine, you may run into some quirks!

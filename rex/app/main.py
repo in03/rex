@@ -4,12 +4,7 @@ from datetime import datetime
 from rich import print
 from rich import traceback as rich_tracebacks
 
-from rex.app.utils import core
 from rex.settings.manager import SettingsManager
-from rex import exceptions
-from yaspin import yaspin
-from glob import glob
-from difflib import SequenceMatcher
 import hashlib
 from pydavinci import davinci
 

@@ -11,9 +11,8 @@ settings_schema = Schema(
             "logfile_path": lambda p: os.path.exists(p),
         },
         "schedule": {
+            "frequency_in_minutes": int,
             "countdown_warning": int,
-            "enabled_backup_music": bool,
-            "backup_music_path": lambda p: os.path.exists(p),
         },
         "server": {
             "port": int,

@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from pydavinci import davinci
-from rex.main import Backup
-from uuid import UUID
+from rex.app.main import Backup
 
 
 app = FastAPI()
